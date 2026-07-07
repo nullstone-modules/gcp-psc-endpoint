@@ -1,0 +1,16 @@
+org_name: nullstone
+name: gcp-psc-endpoint
+friendly_name: Private Service Connect Endpoint
+description: Creates a Private Service Connect endpoint to privately reach a service published in another GCP project/network
+category: ingress
+subcategory: ""
+provider_types:
+    - gcp
+platform: psc
+subplatform: ""
+type: ""
+appCategories: []
+is_public: true
+tool_name: opentofu
+include: []
+source_url: https://github.com/nullstone-modules/gcp-psc-endpoint
