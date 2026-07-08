@@ -16,4 +16,15 @@ resource "google_compute_forwarding_rule" "this" {
   // If the producer closes the connection, the endpoint must be recreated to reconnect.
   recreate_closed_psc = true
   labels              = local.labels
+
+  lifecycle {
+    // The wildcard DNS record for the gateway's service domain (see dns.tf) can only live in
+    // this network's internal zone if the gateway's hostnames are rooted in the same domain;
+    // otherwise consumer Host headers would never match the gateway's routes. Skipped when the
+    // producer publishes no DNS information (non-gateway producers).
+    precondition {
+      condition     = local.gateway_internal_domain == "" || local.gateway_internal_domain == local.internal_domain
+      error_message = "The gateway publishes hostnames under internal domain \"${local.gateway_internal_domain}\" but this network's internal domain is \"${local.internal_domain}\". Both networks must share the same internal domain — set var.internal_subdomain on this network's gcp-network block to match the gateway's network."
+    }
+  }
 }

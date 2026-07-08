@@ -5,12 +5,12 @@ output "endpoint_ip" {
 
 output "fqdn" {
   value       = local.fqdn
-  description = "string ||| The fully-qualified private DNS name of the PSC endpoint. Empty if no DNS record was created."
+  description = "string ||| The wildcard private DNS name (\"*.<service_domain>\") registered for this endpoint. Apps behind the gateway resolve as <app-name>.<service_domain>. Empty if no DNS record was created."
 }
 
 output "public_urls" {
   value       = local.fqdn != "" ? ["http://${local.fqdn}"] : []
-  description = "list(string) ||| URLs to reach the PSC service through this endpoint."
+  description = "list(string) ||| URL pattern for reaching apps through this endpoint; replace the * with the app's name."
 }
 
 output "forwarding_rule_id" {

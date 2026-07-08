@@ -8,7 +8,7 @@ Pairs with `gcp-gke-psc-gateway` (or any ingress block that outputs `service_att
 
 ```
 This VPC (consumer)                            Producer VPC (other project)
-App (env region) ─► DNS (<dns_name>.<internal_domain>)
+App (env region) ─► DNS (*.<service_domain>)
                     └─► PSC Endpoint ───────► Service Attachment ──► Internal ALB / Gateway
                         (producer's region)   (ACCEPT_MANUAL)
 ```
@@ -18,8 +18,8 @@ App (env region) ─► DNS (<dns_name>.<internal_domain>)
   which may not match this environment's region.
 - Reserves a static internal IP in that subnet and creates a forwarding rule targeting
   the producer's PSC service attachment.
-- Optionally registers an A record in the network's internal private DNS zone
-  (`<dns_name>.<internal_domain>` → endpoint IP).
+- Registers a wildcard A record in the network's internal private DNS zone
+  (`*.<service_domain>` → endpoint IP) when the producer publishes a `service_domain`.
 
 ## Connections
 
@@ -30,9 +30,14 @@ App (env region) ─► DNS (<dns_name>.<internal_domain>)
 
 ## DNS
 
-Set `dns_name` to register a hostname under the network's internal domain (requires the network's
-`internal_subdomain` to be configured). Use `dns_name = "*"` for a wildcard record when the producer
-is a gateway that routes to apps by hostname — any `<app>.<internal_domain>` then resolves to the endpoint.
+When the producer is a gateway (e.g. `gcp-gke-psc-gateway`), it publishes a `service_domain`
+(`<dns_name>.<internal_domain>`) that its app hostnames live under. This module registers a wildcard
+record `*.<service_domain>` pointing at the endpoint IP, so `<app>.<service_domain>` resolves here and
+the Host header matches the gateway's routes.
+
+Because the record lives in this network's internal zone, **both networks must share the same internal
+domain** — the apply fails with a clear error otherwise. Configure `internal_subdomain` on this network's
+`gcp-network` block to match the gateway's network.
 
 ## Connection acceptance
 
