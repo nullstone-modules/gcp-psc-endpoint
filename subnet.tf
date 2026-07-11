@@ -6,4 +6,15 @@ resource "google_compute_subnetwork" "endpoint" {
   ip_cidr_range = var.endpoint_subnet_cidr
   network       = local.vpc_name
   region        = local.psc_region
+
+  dynamic "log_config" {
+    for_each = local.vpc_flow_logs_settings
+    iterator = lc
+
+    content {
+      aggregation_interval = lc.value.aggregation_interval
+      flow_sampling        = lc.value.flow_sampling
+      metadata             = lc.value.metadata
+    }
+  }
 }
